@@ -1,0 +1,13 @@
+*.tar.gz
+models
+models/
+muavic-setup/
+muavic/
+noise/
+slurm/decode_slurm/
+slurm/train_audio_slurm/
+slurm/train_video_slurm/
+av_hubert/
+whisper/__pycache__/
+__pycache__/
+decode/

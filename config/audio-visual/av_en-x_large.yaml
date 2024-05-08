@@ -1,0 +1,49 @@
+train_name: whisper
+audio_max_length: 240000 
+text_max_length: 250 
+accelerator: auto
+weight_decay: 0.01
+adam_epsilon: 1.0e-8
+num_worker: 16
+validate_every_n_batches: 1000
+num_devices: 4
+
+model_name: large-v2
+learning_rate: 1.0e-4 
+batch_size: 3
+num_train_steps: 40000
+warmup_steps: 5000
+gradient_accumulation_steps: 1
+
+monitor: 'val_noisy_en_babble/acc_av' # noisy test set
+noise_prob: 1.0
+noise_snr_train: 0
+noise_fn: '/data/sls/scratch/roudi/datasets/musan/tsv/all/train.tsv'
+noise_fn_val: 'noise/babble/lrs3/valid.tsv' # single lrs3 babble mixture
+noise_fn_test: 'noise/babble/lrs3/test.tsv' # single lrs3 babble mixture
+
+video_model_ckpt: 'models/large_noise_pt_noise_ft_433h_only_weights.pt'
+freeze_video_model: True
+freeze_video_batch_norm_stats: False 
+
+spec_augment: "ls-basic"
+dropout_rate: 0 
+
+lang: multi_en-st
+pt_ckpt: models/whisper_en-x_large.pt
+resume_training: False
+train_id: whisper-flamingo_en-x_large
+
+video_projection_train_only: False
+video_projection_separate_lr: ''
+prob_use_av: 1.0 # For Whisper-Flamingo, no modality dropout
+
+# video
+use_av_hubert_encoder: True
+add_gated_x_attn: 1 # 0 for False, 1 for True
+av_fusion: separate 
+
+log_output_dir: "slurm/train_video_slurm"
+check_output_dir: "models/checkpoint"
+
+
