@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J decode_avsr          # Your job name to be displayed by squeue
-#SBATCH -o /usr/users/roudi/whisper-flamingo-dev/slurm/decode_slurm/whisper_video_%j.out   # path to write stdout, %j will be jobID
-#SBATCH -e /usr/users/roudi/whisper-flamingo-dev/slurm/decode_slurm/whisper_video_%j.err    # path to write stderr, %j will be jobID
+#SBATCH -o /usr/users/roudi/whisper-flamingo/slurm/decode_slurm/whisper_video_%j.out   # path to write stdout, %j will be jobID
+#SBATCH -e /usr/users/roudi/whisper-flamingo/slurm/decode_slurm/whisper_video_%j.err    # path to write stderr, %j will be jobID
 #SBATCH --qos=regular
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
@@ -15,7 +15,7 @@ CONDA_ROOT=/usr/users/roudi/vtenvs/anaconda3/
 source ${CONDA_ROOT}/etc/profile.d/conda.sh
 conda activate $PYTHON_VIRTUAL_ENVIRONMENT
 
-cd /usr/users/roudi/whisper-flamingo-dev
+cd /usr/users/roudi/whisper-flamingo
 
 srun hostname
 echo $CUDA_VISIBLE_DEVICES

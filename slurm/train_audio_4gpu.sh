@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J w_4gpu         # Your job name to be displayed by squeue
-#SBATCH -o /usr/users/roudi/whisper-flamingo-dev/slurm/train_audio_slurm/ft_w_4gpu_%j.out   # path to write stdout, %j will be jobID
-#SBATCH -e /usr/users/roudi/whisper-flamingo-dev/slurm/train_audio_slurm/ft_w_4gpu_%j.err   # path to write stdout, %j will be jobIDD
+#SBATCH -o /usr/users/roudi/whisper-flamingo/slurm/train_audio_slurm/ft_w_4gpu_%j.out   # path to write stdout, %j will be jobID
+#SBATCH -e /usr/users/roudi/whisper-flamingo/slurm/train_audio_slurm/ft_w_4gpu_%j.err   # path to write stdout, %j will be jobIDD
 #SBATCH --qos=regular
 #SBATCH --gres=gpu:4
 #SBATCH --nodes=1
@@ -18,6 +18,6 @@ CONDA_ROOT=/usr/users/roudi/vtenvs/anaconda3/
 source ${CONDA_ROOT}/etc/profile.d/conda.sh
 conda activate $PYTHON_VIRTUAL_ENVIRONMENT
 
-cd /usr/users/roudi/whisper-flamingo-dev
+cd /usr/users/roudi/whisper-flamingo
 
 srun python -u whisper_ft_muavic.py config/audio/audio_en-x_large.yaml
