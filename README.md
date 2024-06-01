@@ -7,9 +7,25 @@ Moreover, Whisper-Flamingo is a versatile model and conducts all of these tasks 
 
 ![Whisper-Flamingo](assets/whisper_flamingo_fig.jpg "Whisper-Flamingo")
 
-# Demo on Colab
-We provide a colab to reproduce our results: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1tYI_7GxJuQdhWnO4m6TUplEoxVaYgbvW)
+# Video Demos
+Check out the video demo below (turn sound on).
+We made several videos about Whisper-Flamingo:
+- 30s demo of Whisper-Flamingo (same video below): [YouTube link](https://youtu.be/EsFlaqYVkro)
+- 2m demo comparing Whisper and Whisper-Flamingo: [YouTube link](https://youtu.be/elHF-EQgmNs)
+- 10m presentation: [YouTube link](https://youtu.be/MemXz2IqwIM)
 
+<table class="center">
+<tr>
+    <td width=100% style="border: none">
+        <video controls autoplay loop src="assets/demo_640.m4v" muted="false"></video>
+    </td>
+</tr>
+</table>
+
+# Colab Demos
+We support two colab demos:
+- Test Whisper-Flamingo on an example audio / video [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1rnhNOZuUxh-WXXloo_z1fu5DKeJrH95p)
+- Reproduce our results on LRS3 / MuAViC: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1tYI_7GxJuQdhWnO4m6TUplEoxVaYgbvW)
 
 # Virtual Environment for Training and Testing
 Since this project uses the MuAViC dataset, we base our virtual environment on theirs.
@@ -63,6 +79,11 @@ echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/valid.tsv
 
 # Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
+- Our audio models are fine-tuned with noise from MUSAN and LRS3 (including babble noise, speech, and music), making them perform better in noise (see the paper and our video demo for more details)
+- Our models support transcription in English (En) and En-X translation into 6 languages: Greek (El), Spanish (Es), French (Fr), Italian (It), Portuguese (Pt), and Russian (Ru).
+Note that to enable the new En-X translation capabilities, we use the 'transcribe' token instead of the 'translate' token as input to the decoder since the latter was already used for X-En translation.
+- For English, our models don't output punctuation and capitalization since the LRS3 English training text removed them. For En-X translation, our models output punctuation and capitalization since they were retained in the training translations.
+
 ### Audio-only Whisper (fine-tuned on LRS3 / MuAViC)
 |   Mod.  |   Size  |   Parameters  |   En ASR  |   En-X ST  |   GPUs  |   Download Link  |
 |---|---|---|---|---|---|---|
@@ -164,6 +185,9 @@ Tensorboard can be opened to monitor several metrics.
 cd slurm
 tensorboard --logdir .  --port 6008
 ```
+### Training notes
+- Training should work on 1 GPU or multiple GPUs, although some settings need to be adjusted (such as batch size)
+- The original Whisper code always pads audio to 30s. We avoid this and instead batch together samples of similar length and pad to the longest sample in the batch (this minimizes padding).
 
 
 # Acknowledgments
