@@ -17,7 +17,7 @@ We made several videos about Whisper-Flamingo:
 <table class="center">
 <tr>
     <td width=100% style="border: none">
-        <video controls autoplay loop src="assets/demo_640.m4v" muted="false"></video>
+        <video controls autoplay loop src="assets/demo_640.mp4" muted="false"></video>
     </td>
 </tr>
 </table>
