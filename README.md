@@ -23,7 +23,7 @@ We made several videos about Whisper-Flamingo:
 </table>
 
 # Colab Demos
-We support two colab demos:
+We support two colab demos (local copies in `./notebooks`):
 - Test Whisper-Flamingo on an example audio / video [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1rnhNOZuUxh-WXXloo_z1fu5DKeJrH95p)
 - Reproduce our results on LRS3 / MuAViC: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1tYI_7GxJuQdhWnO4m6TUplEoxVaYgbvW)
 
