@@ -17,7 +17,7 @@ We made several videos about Whisper-Flamingo:
 <table class="center">
 <tr>
     <td width=100% style="border: none">
-        <video controls autoplay loop src="https://github.com/roudimit/muavic/assets/16767254/164404a4-2d05-44a7-8ebf-598581860199" muted="false"></video>
+        <video controls autoplay loop src="https://github.com/roudimit/whisper-flamingo/assets/16767254/7ce5b2c3-4d21-4453-8bd2-8c4977c948f9" muted="false"></video>
     </td>
 </tr>
 </table>
