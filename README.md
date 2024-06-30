@@ -198,9 +198,11 @@ This code based is based on the following repos: [Whisper Fine-Tuning Demo](http
 Our work is licensed under BSD-3. However, please check the licenses of the works we build on, including AV-HuBERT.
 
 # Citation
+```bibtex
 @article{rouditchenko2024whisper,
   title={Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation},
   author={Rouditchenko, Andrew and Gong, Yuan and Thomas, Samuel and Karlinsky, Leonid and Kuehne, Hilde and Feris, Rogerio and Glass, James},
   journal={arXiv preprint arXiv:2406.10082},
   year={2024}
 }
+```
