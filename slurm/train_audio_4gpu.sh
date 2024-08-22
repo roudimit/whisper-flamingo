@@ -5,7 +5,7 @@
 #SBATCH --qos=regular
 #SBATCH --gres=gpu:4
 #SBATCH --nodes=1
-#SBATCH --partition=a6
+#SBATCH --partition=a5
 #SBATCH --mem=0
 #SBATCH --ntasks-per-node=4 # assert ntasks_per_node == cfg.distributed_world_size // nnodes
 
