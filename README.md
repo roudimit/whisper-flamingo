@@ -17,7 +17,7 @@ We made several videos about Whisper-Flamingo:
 <table class="center">
 <tr>
     <td width=100% style="border: none">
-        <video controls autoplay loop src="https://github.com/roudimit/muavic/assets/16767254/164404a4-2d05-44a7-8ebf-598581860199" muted="false"></video>
+        <video controls autoplay loop src="https://github.com/roudimit/whisper-flamingo/assets/16767254/7ce5b2c3-4d21-4453-8bd2-8c4977c948f9" muted="false"></video>
     </td>
 </tr>
 </table>
@@ -198,4 +198,11 @@ This code based is based on the following repos: [Whisper Fine-Tuning Demo](http
 Our work is licensed under BSD-3. However, please check the licenses of the works we build on, including AV-HuBERT.
 
 # Citation
-TBD
+```bibtex
+@article{rouditchenko2024whisper,
+  title={Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation},
+  author={Rouditchenko, Andrew and Gong, Yuan and Thomas, Samuel and Karlinsky, Leonid and Kuehne, Hilde and Feris, Rogerio and Glass, James},
+  journal={arXiv preprint arXiv:2406.10082},
+  year={2024}
+}
+```
