@@ -1,6 +1,8 @@
 # Whisper-Flamingo
 Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation
 
+**Oct 11, 2024: we achieved SOTA ASR (0.68% WER) and SOTA AVSR (0.72% WER) on LRS3 by training on LRS3 and VoxCeleb2 - checkpoints are released below.**
+
 We propose Whisper-Flamingo which integrates visual features into the Whisper speech recognition and translation model with gated cross attention. 
 Our audio-visual Whisper-Flamingo outperforms audio-only Whisper on English speech recognition and En-X translation for 6 languages in noisy conditions.
 Moreover, Whisper-Flamingo is a versatile model and conducts all of these tasks using one set of parameters, while prior methods are trained separately on each language.
@@ -80,7 +82,7 @@ echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/valid.tsv
 # Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
 - Our audio models are fine-tuned with noise from MUSAN and LRS3 (including babble noise, speech, and music), making them perform better in noise (see the paper and our video demo for more details)
-- We also release the models trained on the combination of LRS3 and VoxCeleb2 (the transcripts of VoxCeleb2 were obtained by Whisper Large-V2, available from this [repo](https://github.com/nikvaessen/disjoint-mtl?tab=readme-ov-file)). We release the models fine-tuned with noise (noisy) and without noise (clean). **whisper_en_large_vc2_clean achieves SOTA on LRS3 (0.68% ASR WER) and whisper-flamingo_en_large_vc2_clean achieves close to SOTA on LRS3 (0.85% AVSR WER).**
+- We also release the models trained on the combination of LRS3 and VoxCeleb2 (the transcripts of VoxCeleb2 were obtained by Whisper Large-V2, available from this [repo](https://github.com/nikvaessen/disjoint-mtl?tab=readme-ov-file)). We release the models fine-tuned with noise (noisy) and without noise (clean). **whisper_en_large_vc2_clean achieves SOTA ASR on LRS3 (0.68% WER) and whisper-flamingo_en_large_vc2_clean achieves SOTA AVSR on LRS3 (0.72% WER).**
 - Our models support transcription in English (En) and En-X translation into 6 languages: Greek (El), Spanish (Es), French (Fr), Italian (It), Portuguese (Pt), and Russian (Ru).
 Note that to enable the new En-X translation capabilities, we use the 'transcribe' token instead of the 'translate' token as input to the decoder since the latter was already used for X-En translation.
 - For English, our models don't output punctuation and capitalization since the LRS3 English training text removed them. For En-X translation, our models output punctuation and capitalization since they were retained in the training translations.
