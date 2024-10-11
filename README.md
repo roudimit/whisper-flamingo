@@ -80,25 +80,28 @@ echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/valid.tsv
 # Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
 - Our audio models are fine-tuned with noise from MUSAN and LRS3 (including babble noise, speech, and music), making them perform better in noise (see the paper and our video demo for more details)
+- We also release the models trained on the combination of LRS3 and VoxCeleb2 (the transcripts of VoxCeleb2 were obtained by Whisper Large-V2, available from this [repo](https://github.com/nikvaessen/disjoint-mtl?tab=readme-ov-file)). We release the models fine-tuned with noise (noisy) and without noise (clean). **whisper_en_large_vc2_clean achieves SOTA on LRS3 (0.68% ASR WER) and whisper-flamingo_en_large_vc2_clean achieves close to SOTA on LRS3 (0.85% AVSR WER).**
 - Our models support transcription in English (En) and En-X translation into 6 languages: Greek (El), Spanish (Es), French (Fr), Italian (It), Portuguese (Pt), and Russian (Ru).
 Note that to enable the new En-X translation capabilities, we use the 'transcribe' token instead of the 'translate' token as input to the decoder since the latter was already used for X-En translation.
 - For English, our models don't output punctuation and capitalization since the LRS3 English training text removed them. For En-X translation, our models output punctuation and capitalization since they were retained in the training translations.
 
 ### Audio-only Whisper (fine-tuned on LRS3 / MuAViC)
-|   Mod.  |   Size  |   Parameters  |   En ASR  |   En-X ST  |   GPUs  |   Download Link  |
-|---|---|---|---|---|---|---|
-|   A  |   Large-V2  |   1,550M  |   y  |   y  |   4x A6000, 48GB  |   [whisper_en-x_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_large.pt)  |
-|   A  |   Large-V2  |   1,550M  |   y  |   n  |   1x A6000, 48GB  |   [whisper_en_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large.pt)  |
-|   A  |   Medium  |   769M  |   y  |   y  |   4x A5000, 24GB  |   [whisper_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_medium.pt)  |
-|   A  |   Small  |   244M  |   y  |   y  |   4x A5000, 24GB  |   [whisper_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_small.pt)  |
+|   Mod.  |   Size  |   VoxCeleb2 | Parameters  |   En ASR  |   En-X ST  |   GPUs  |   Download Link  |
+|---|---|---|---|---|---|---|---|
+|   A  |   Large-V2  | yes |   1,550M  |   yes  |   no  |   1x A6000, 48GB  |   noisy: [whisper_en_large_vc2_noisy](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large_vc2_noisy.pt) <br> clean: [whisper_en_large_vc2_clean](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large_vc2_clean.pt) |
+|   A  |   Large-V2  | no |   1,550M  |   yes  |   no  |   1x A6000, 48GB  |   [whisper_en_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large.pt)  |
+|   A  |   Large-V2  | no |   1,550M  |   yes  |   yes  |   4x A6000, 48GB  |   [whisper_en-x_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_large.pt)  |
+|   A  |   Medium  | no |   769M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_medium.pt)  |
+|   A  |   Small  | no |   244M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_small.pt)  |
 
 ### Audio-visual Whisper-Flamingo
-|   Mod.  |   Size  |   Parameters  |   En ASR  |   En-X ST  |   GPUs  |   Download Link  |
-|---|---|---|---|---|---|---|
-|   AV  |   Large-V2  |   2,497M  |   y  |   y  |   4x A6000, 48GB  |   [whisper-flamingo_en-x_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_large.pt)  |
-|   AV  |   Large-V2  |   2,497M  |   y  |   n  |   1x A6000, 48GB  |   [whisper-flamingo_en_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large.pt)  |
-|   AV  |   Medium  |   1,390M  |   y  |   y  |   4x A6000, 48GB  |   [whisper-flamingo_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_medium.pt)  |
-|   AV  |   Small  |   651M  |   y  |   y  |   4x A5000, 24GB  |   [whisper-flamingo_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_small.pt)  |
+|   Mod.  |   Size  |   VoxCeleb2 | Parameters  |   En ASR  |   En-X ST  |   GPUs  |   Download Link  |
+|---|---|---|---|---|---|---|---|
+|   AV  |   Large-V2  | yes |    2,497M  |   yes  |   no  |   1x A6000, 48GB  |   noisy: [whisper-flamingo_en_large_vc2_noisy](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large_vc2_noisy.pt) <br> clean: [whisper-flamingo_en_large_vc2_clean](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large_vc2_clean.pt)   |
+|   AV  |   Large-V2  | no |    2,497M  |   yes  |   no  |   1x A6000, 48GB  |   [whisper-flamingo_en_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large.pt)  |
+|   AV  |   Large-V2  | no |    2,497M  |   yes  |   yes  |   4x A6000, 48GB  |   [whisper-flamingo_en-x_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_large.pt)  |
+|   AV  |   Medium  | no |   1,390M  |   yes  |   yes  |   4x A6000, 48GB  |   [whisper-flamingo_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_medium.pt)  |
+|   AV  |   Small  | no |    651M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper-flamingo_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_small.pt)  |
 
 # Decoding Script
 
@@ -199,10 +202,13 @@ Our work is licensed under BSD-3. However, please check the licenses of the work
 
 # Citation
 ```bibtex
-@article{rouditchenko2024whisper,
-  title={Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation},
-  author={Rouditchenko, Andrew and Gong, Yuan and Thomas, Samuel and Karlinsky, Leonid and Kuehne, Hilde and Feris, Rogerio and Glass, James},
-  journal={arXiv preprint arXiv:2406.10082},
-  year={2024}
+@inproceedings{rouditchenko24_interspeech,
+  title     = {Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation},
+  author    = {Andrew Rouditchenko and Yuan Gong and Samuel Thomas and Leonid Karlinsky and Hilde Kuehne and Rogerio Feris and James Glass},
+  year      = {2024},
+  booktitle = {Interspeech 2024},
+  pages     = {2420--2424},
+  doi       = {10.21437/Interspeech.2024-322},
+  issn      = {2958-1796},
 }
 ```
