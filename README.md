@@ -84,7 +84,7 @@ echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/test.tsv
 echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/valid.tsv
 ```
 
-LRS2: The data can be downloaded [here](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html) after signing a license and sending it to the BBC. In our experience, it took a week to receive the username & password for the data download. We used the [AutoAVSR scripts](https://github.com/mpc001/auto_avsr/tree/main/preparation) to process LRS2 (using the provided facial landmarks). Finally, the AutoAVSR data lists must be converted to AV-HuBERT / Fairseq manifests. We provide a script to do this (`notebooks/lrs2_make_tsv.ipynb`).
+LRS2: The data can be downloaded [here](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html) after signing a license and sending it to the BBC (helper script: `notebooks/lrs2_download.ipynb`). In our experience, it took a week to receive the username & password for the data download. We used the [AutoAVSR scripts](https://github.com/mpc001/auto_avsr/tree/main/preparation) to process LRS2 (using the provided facial landmarks). Finally, the AutoAVSR data lists must be converted to AV-HuBERT / Fairseq manifests. We provide a script to do this (`notebooks/lrs2_make_tsv.ipynb`).
 
 # Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
