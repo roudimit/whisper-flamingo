@@ -332,6 +332,9 @@ elif cfg.lang == 'multi_en-st':
 elif '-st' in cfg.lang:
     audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, [cfg.lang.replace('-st', '')], 
                                            include_audio_lens=True, translate=True)
+elif 'lrs2' in cfg.lang:
+    audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, ['en'], 
+                                        include_audio_lens=True, lrs2=True)
 else:
     audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, [cfg.lang], include_audio_lens=True)
 model = WhisperModelModule(cfg, cfg.model_name, cfg.lang, audio_transcript_pair_list['train'], 

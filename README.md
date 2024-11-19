@@ -1,7 +1,12 @@
 # Whisper-Flamingo
-Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation
 
-**Oct 11, 2024: we achieved SOTA ASR (0.68% WER) and SOTA AVSR (0.72% WER) on LRS3 by training on LRS3 and VoxCeleb2 - checkpoints are released below.**
+## Updates
+**Nov 19, 2024:** We achieved SOTA ASR (1.3\%) and SOTA AVSR (1.4\%) on LRS2 - checkpoints are released below.  
+**Oct 11, 2024:** We achieved SOTA ASR (0.68% WER) and SOTA AVSR (0.72% WER) on LRS3 by training on LRS3 and VoxCeleb2 - checkpoints are released below.
+
+## Introduction
+
+Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation
 
 We propose Whisper-Flamingo which integrates visual features into the Whisper speech recognition and translation model with gated cross attention. 
 Our audio-visual Whisper-Flamingo outperforms audio-only Whisper on English speech recognition and En-X translation for 6 languages in noisy conditions.
@@ -65,7 +70,7 @@ pip install tiktoken==0.5.2 pytorch-lightning==2.1.3 numba==0.58.1 transformers=
 ```
 
 # Download and prepare data
-We provide all data to reproduce the results on the test set. For instructions on how to prepare the training set (and more details about the test noise), see `preparation/README.md`. 
+LRS3 / MuAViC: We provide all data to reproduce the results on the test set. For instructions on how to prepare the LRS3 training set (and more details about the test noise), see `preparation/README.md`. 
 
 Download and extract our resources:
 ```
@@ -79,13 +84,17 @@ echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/test.tsv
 echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/valid.tsv
 ```
 
+LRS2: The data can be downloaded [here](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html) after signing a license and sending it to the BBC. In our experience, it took a week to receive the username & password for the data download. We used the [AutoAVSR scripts](https://github.com/mpc001/auto_avsr/tree/main/preparation) to process LRS2 (using the provided facial landmarks). Finally, the AutoAVSR data lists must be converted to AV-HuBERT / Fairseq manifests. We provide a script to do this (`notebooks/lrs2_make_tsv.ipynb`).
+
 # Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
 - Our audio models are fine-tuned with noise from MUSAN and LRS3 (including babble noise, speech, and music), making them perform better in noise (see the paper and our video demo for more details)
 - We also release the models trained on the combination of LRS3 and VoxCeleb2 (the transcripts of VoxCeleb2 were obtained by Whisper Large-V2, available from this [repo](https://github.com/nikvaessen/disjoint-mtl?tab=readme-ov-file)). We release the models fine-tuned with noise (noisy) and without noise (clean). **whisper_en_large_vc2_clean achieves SOTA ASR on LRS3 (0.68% WER) and whisper-flamingo_en_large_vc2_clean achieves SOTA AVSR on LRS3 (0.72% WER).**
-- Our models support transcription in English (En) and En-X translation into 6 languages: Greek (El), Spanish (Es), French (Fr), Italian (It), Portuguese (Pt), and Russian (Ru).
+- LRS2 models: these models are trained on the LRS2 dataset with noise added from MUSAN and LRS3. **whisper_lrs2_medium achieves SOTA ASR on LRS2 (1.3% WER) and whisper-flamingo_lrs2_medium achieves SOTA AVSR on LRS2 (1.4%)**.
+- Our LRS3 models support transcription in English (En) and En-X translation into 6 languages: Greek (El), Spanish (Es), French (Fr), Italian (It), Portuguese (Pt), and Russian (Ru).
 Note that to enable the new En-X translation capabilities, we use the 'transcribe' token instead of the 'translate' token as input to the decoder since the latter was already used for X-En translation.
 - For English, our models don't output punctuation and capitalization since the LRS3 English training text removed them. For En-X translation, our models output punctuation and capitalization since they were retained in the training translations.
+
 
 ### Audio-only Whisper (fine-tuned on LRS3 / MuAViC)
 |   Mod.  |   Size  |   VoxCeleb2 | Parameters  |   En ASR  |   En-X ST  |   GPUs  |   Download Link  |
@@ -93,7 +102,8 @@ Note that to enable the new En-X translation capabilities, we use the 'transcrib
 |   A  |   Large-V2  | yes |   1,550M  |   yes  |   no  |   1x A6000, 48GB  |   noisy: [whisper_en_large_vc2_noisy](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large_vc2_noisy.pt) <br> clean: [whisper_en_large_vc2_clean](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large_vc2_clean.pt) |
 |   A  |   Large-V2  | no |   1,550M  |   yes  |   no  |   1x A6000, 48GB  |   [whisper_en_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en_large.pt)  |
 |   A  |   Large-V2  | no |   1,550M  |   yes  |   yes  |   4x A6000, 48GB  |   [whisper_en-x_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_large.pt)  |
-|   A  |   Medium  | no |   769M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_medium.pt)  |
+|   A  |   LRS2-Medium  | no |   769M  |   yes  |   no  |   1x A6000, 48GB  |   [whisper_lrs2_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_lrs2_medium.pt)  |
+|   A  |   Medium | no |   769M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_medium.pt)  |
 |   A  |   Small  | no |   244M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_small.pt)  |
 
 ### Audio-visual Whisper-Flamingo
@@ -102,6 +112,7 @@ Note that to enable the new En-X translation capabilities, we use the 'transcrib
 |   AV  |   Large-V2  | yes |    2,497M  |   yes  |   no  |   1x A6000, 48GB  |   noisy: [whisper-flamingo_en_large_vc2_noisy](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large_vc2_noisy.pt) <br> clean: [whisper-flamingo_en_large_vc2_clean](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large_vc2_clean.pt)   |
 |   AV  |   Large-V2  | no |    2,497M  |   yes  |   no  |   1x A6000, 48GB  |   [whisper-flamingo_en_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en_large.pt)  |
 |   AV  |   Large-V2  | no |    2,497M  |   yes  |   yes  |   4x A6000, 48GB  |   [whisper-flamingo_en-x_large](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_large.pt)  |
+|   AV  |   LRS2-Medium  | no |   1,390M  |   yes  |   no  |   1x A6000, 48GB  |   [whisper-flamingo_lrs2_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_lrs2_medium.pt)  |
 |   AV  |   Medium  | no |   1,390M  |   yes  |   yes  |   4x A6000, 48GB  |   [whisper-flamingo_en-x_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_medium.pt)  |
 |   AV  |   Small  | no |    651M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper-flamingo_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_small.pt)  |
 
@@ -132,6 +143,19 @@ python -u whisper_decode_video.py --lang en \
                                 --decode-path decode/
 ```
 
+LRS2 ASR decoding (adjust `noise_snr` as desired):
+```
+python -u whisper_decode_video.py --lang lrs2 \
+                                --model-type medium \
+                                --noise-snr 1000 \
+                                --noise-fn noise/babble/lrs3/test.tsv \
+                                --beam-size 1 \
+                                --modalities asr \
+                                --fp16 1 \
+                                --checkpoint-path models/whisper_lrs2_medium.pt \
+                                --decode-path decode/
+```
+
 ### Audio-Visual Decoding
 Download our audio-visual Whisper-Flamingo model fine-tuned for En-X translation.
 Note: the AV-HuBERT weights must be downloaded and are used by Fairseq to load the architecture.
@@ -153,6 +177,23 @@ python -u whisper_decode_video.py --lang en \
                                 --av_fusion separate \
                                 --fp16 1 \
                                 --checkpoint-path models/whisper-flamingo_en-x_small.pt \
+                                --decode-path decode/ \
+                                --av-hubert-path av_hubert/avhubert/ \
+                                --av-hubert-ckpt models/large_noise_pt_noise_ft_433h_only_weights.pt
+```
+
+LRS2 AVSR decoding (adjust `noise_snr` as desired):
+```
+python -u whisper_decode_video.py --lang lrs2 \
+                                --model-type medium \
+                                --noise-snr 1000 \
+                                --noise-fn noise/babble/lrs3/test.tsv \
+                                --beam-size 1 \
+                                --modalities avsr \
+                                --use_av_hubert_encoder 1 \
+                                --av_fusion separate \
+                                --fp16 1 \
+                                --checkpoint-path models/whisper-flamingo_lrs2_medium.pt \
                                 --decode-path decode/ \
                                 --av-hubert-path av_hubert/avhubert/ \
                                 --av-hubert-ckpt models/large_noise_pt_noise_ft_433h_only_weights.pt

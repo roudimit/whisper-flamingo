@@ -39,15 +39,17 @@ parser.add_argument('--av-hubert-ckpt', default="models/large_noise_pt_noise_ft_
                                         help='path to avhubert ckpt (needed to load the model architecture)')
 args = parser.parse_args()
 
-assert args.noise_snr == 0 or args.noise_snr > 100
-
 SAMPLE_RATE = 16000
 SEED = 3407
 seed_everything(SEED, workers=True)
 
+use_lrs2 = True if args.lang == 'lrs2' else False
+if args.lang == 'lrs2':
+    args.lang = 'en'
+
 audio_transcript_pair_list = load_data(480000, 350, [args.lang], muavic_root='', 
                                        include_audio_lens=True, 
-                                       translate=True if args.lang != 'en' else False)
+                                       translate=True if args.lang != 'en' else False, lrs2=use_lrs2)
 test_dataset =  audio_transcript_pair_list['test']
 test_dataset = [[i[0], i[1].replace('/data/sls/scratch/roudi/datasets/muavic/', ''),
                                     i[2], i[3]] for i in test_dataset] # fix paths
@@ -62,9 +64,10 @@ dataset = MuavicVideoDataset(test_dataset,
                                 args.model_type,
                                 max_length=None if args.checkpoint_path else SAMPLE_RATE * 30,
                                 spec_augment="", # no spec augment
-                                noise_prob=1 if args.noise_snr == 0 else 0, # TODO: implement non-0 snr
+                                noise_prob=1 if args.noise_snr != 1000 else 0,
                                 noise_fn = args.noise_fn,
-                                train=False # video center crop, no flip
+                                train=False, # video center crop, no flip
+                                noise_snr=args.noise_snr,
                             )   
 
 # For beam size of 1, use batch decoding with ~40s of audio per batch
