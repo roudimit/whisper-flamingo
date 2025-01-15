@@ -1,0 +1,33 @@
+train_name: whisper
+audio_max_length: 320000 # 20s 
+text_max_length: 350
+accelerator: auto
+weight_decay: 0.01
+adam_epsilon: 1.0e-8
+num_worker: 16
+validate_every_n_batches: 1000
+num_devices: 4
+
+model_name: medium
+learning_rate: 6.25e-6 # medium
+batch_size: 1.6 # 32s (1.6 * audio_max_length)
+num_train_steps: 110000
+warmup_steps: 1000
+gradient_accumulation_steps: 1
+
+monitor: 'val_noisy_multi_babble/acc' # noisy test set
+noise_prob: 1.0
+noise_fn: '/data/sls/scratch/roudi/datasets/musan/tsv/all/train.tsv'
+noise_fn_val: 'noise/babble/lrs3/valid.tsv' # single lrs3 babble mixture
+noise_fn_test: 'noise/babble/lrs3/test.tsv' # single lrs3 babble mixture
+
+spec_augment: ""
+dropout_rate: 0 
+
+resume_training: false
+# lang: multi # en, es, fr, it, pt
+lang: multi-all # en, ar, de, el, es, fr, it, pt, ru
+train_id: whisper_multi-all_medium
+
+log_output_dir: "slurm/train_audio_slurm"
+check_output_dir: "models/checkpoint"

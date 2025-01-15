@@ -62,8 +62,9 @@ class MuavicVideoDataset(torch.utils.data.Dataset):
             sample_rate, wav_data = wavfile.read(audio_path)
             audio = wav_data.flatten().astype(np.float32) / 32768.0
         else: # add noise
+            SNR = self.noise_snr            
             sample_rate, wav_data = wavfile.read(audio_path)
-            audio = add_noise(wav_data, self.noise_fn, noise_snr=self.noise_snr).flatten().astype(np.float32) / 32768.0
+            audio = add_noise(wav_data, self.noise_fn, noise_snr=SNR).flatten().astype(np.float32) / 32768.0
 
         audio_frames = len(audio.flatten()) // 160
         # pad audio to cfg.audio_max_length (longer samples filtered out already)
@@ -117,6 +118,7 @@ class WhisperVideoModule(LightningModule):
                                         video=True,
                                         video_model_path=cfg.video_model_ckpt, 
                                         prob_av=cfg.prob_use_av, 
+                                        prob_a=cfg.prob_use_a,
                                         av_hubert_encoder=cfg.use_av_hubert_encoder,
                                         av_fusion=cfg.av_fusion,
                                         add_gated_x_attn=cfg.add_gated_x_attn,)
@@ -133,7 +135,9 @@ class WhisperVideoModule(LightningModule):
                 self.model.load_state_dict(state_dict_updated, strict=False) 
         self.freeze_video_model = cfg.freeze_video_model
         self.freeze_video_batch_norm_stats = cfg. freeze_video_batch_norm_stats
-        self.tokenizer = whisper.tokenizer.get_tokenizer(multilingual=True, task='transcribe')
+        multilingual = True if 'large' in model_name or 'en' not in model_name else False
+        print("Multilingual tokenizer : {}".format(multilingual))
+        self.tokenizer = whisper.tokenizer.get_tokenizer(multilingual=multilingual, task='transcribe')
 
         # if 'large' in self.model_name: # only decoder training
         #     for p in self.model.encoder.parameters():
@@ -165,8 +169,7 @@ class WhisperVideoModule(LightningModule):
             self.model.encoder.video_model.eval()
 
         if self.cfg.add_gated_x_attn != 0: # freeze whisper encoder gradients for x-attn
-            # video_projection_layers = ["video_projection"] if self.cfg.freeze_video_model else ["video"]
-            video_projection_layers = ["video_projection"]
+            video_projection_layers = ["video_projection"] if self.cfg.freeze_video_model else ["video"]
             for n, p in self.model.encoder.named_parameters():
                 if not any(nd in n for nd in video_projection_layers):
                     p.requires_grad = False
@@ -388,43 +391,29 @@ if __name__ == "__main__":
                                                                                 cfg.train_name, 
                                                                                 cfg.train_id,
                                                                                 cfg.monitor,)
-    if cfg.lang == 'multi':
+    if cfg.lang == 'multi-all':
         audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
                                             ['en', 'ar', 'de', 'el', 'es', 'fr', 'it', 'pt', 'ru'],
-                                            reduce_val=150, include_audio_lens=True)
+                                            reduce_val=300, include_audio_lens=True)
+    elif cfg.lang == 'multi':
+        audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
+                                            ['en', 'es', 'fr', 'it', 'pt'],
+                                            reduce_val=300, include_audio_lens=True)
     elif cfg.lang == 'multi_en-st':
         audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
                                            ['en', 'el', 'es', 'fr', 'it', 'pt', 'ru'],
-                                            #    ['el', 'es', 'fr', 'it', 'pt', 'ru'],
-                                           reduce_val=200, include_audio_lens=True, translate=True)
-    elif '-st' in cfg.lang:
-        audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, [cfg.lang.replace('-st', '')], 
-                                           include_audio_lens=True, translate=True)
+                                           reduce_val=200, include_audio_lens=True, task='En-X')
     elif 'lrs2' in cfg.lang:
         audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, ['en'], 
                                             include_audio_lens=True, lrs2=True)
     else:
         audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
-                                               [cfg.lang], include_audio_lens=True)
+                                               [cfg.lang], include_audio_lens=True, vc2=cfg.vc2, vc2_path=cfg.vc2_path)
 
     model = WhisperVideoModule(cfg, cfg.model_name, cfg.lang, 
                                audio_transcript_pair_list['train'], 
                                audio_transcript_pair_list['valid'],
                                audio_transcript_pair_list['test'])
-
-    # NOTE: might need to put this in the model definition since now distributed?
-    # if cfg.pt_ckpt != '': # load audio-only FT ckpt
-    #     checkpoint_root = '/data/sls/scratch/roudi/experiments/muavic/whisper-audio/checkpoint/'
-    #     state_dict = torch.load(os.path.join(checkpoint_root, cfg.pt_ckpt, 'last.ckpt'), map_location=torch.device('cpu'))
-    #     state_dict = state_dict['state_dict']
-    #     state_dict_updated = {k[6:]: v  for k, v in state_dict.items()} # remove 'model.'
-    #     print(state_dict_updated.keys())
-    #     try:
-    #         model.load_state_dict(state_dict_updated) 
-    #     except BaseException as e: 
-    #         print(str(e))
-    #         print("Loading weights with strict=False")
-    #         model.load_state_dict(state_dict_updated, strict=False) 
     
     strategy = DDPStrategy(find_unused_parameters=True) if cfg.num_devices > 1 else "auto"
     trainer = Trainer(

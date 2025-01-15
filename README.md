@@ -1,8 +1,9 @@
 # Whisper-Flamingo
 
 ## Updates
-**Nov 19, 2024:** We achieved SOTA ASR (1.3\%) and SOTA AVSR (1.4\%) on LRS2 - checkpoints are released below.  
-**Oct 11, 2024:** We achieved SOTA ASR (0.68% WER) and SOTA AVSR (0.72% WER) on LRS3 by training on LRS3 and VoxCeleb2 - checkpoints are released below.
+**Jan 2025:** We released mWhisper-Flamingo, a SOTA audio-visual model for 9 languages (paper coming soon)!   
+**Nov 2024:** We achieved SOTA ASR (1.3\%) and SOTA AVSR (1.4\%) on LRS2 - checkpoints are released below.  
+**Oct 2024:** We achieved SOTA ASR (0.68% WER) and SOTA AVSR (0.72% WER) on LRS3 by training on LRS3 and VoxCeleb2 - checkpoints are released below.
 
 ## Introduction
 
@@ -53,6 +54,9 @@ cd ..
 ```
 Clone the "muavic" branch of av_hubert's repo and install Fairseq:
 ```
+# downgrade pip https://github.com/roudimit/whisper-flamingo/issues/4 https://github.com/facebookresearch/fairseq/issues/5511
+python -m pip install pip==24.0
+pip --version
 git clone -b muavic https://github.com/facebookresearch/av_hubert.git
 cd av_hubert
 git submodule init
@@ -70,13 +74,16 @@ pip install tiktoken==0.5.2 pytorch-lightning==2.1.3 numba==0.58.1 transformers=
 ```
 
 # Download and prepare data
-LRS3 / MuAViC: We provide all data to reproduce the results on the test set. For instructions on how to prepare the LRS3 training set (and more details about the test noise), see `preparation/README.md`. 
+LRS3 / MuAViC: We provide all data to reproduce the results on the test set. For instructions on how to prepare the training set (and more details about the test noise), see `preparation/README.md`. For MuAViC non-En, we also provide our text labels which were normalized by removing all punctuation except single apostrophes (the code that we used for text normalization is in `notebooks/mtedx_labels.ipynb`). Note that we normalized all the text (training / validation / test).
 
 Download and extract our resources:
 ```
-wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/muavic.tar.gz
+wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/muavic.tar.gz # En
+wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/muavic-multi.tar.gz # Ar, De, El, Es, It, Fr, Pt, Ru
+# NOTE: you can also download muavic-ar.tar.gz, muavic-de.tar.gz, etc... if you need a specific language.
 wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/noise.tar.gz
 tar -xf muavic.tar.gz
+tar -xf muavic-multi.tar.gz
 tar -xf noise.tar.gz
 echo $(pwd)/noise/babble/muavic/babble_all.wav > ./noise/babble/muavic/test.tsv
 echo $(pwd)/noise/babble/muavic/babble_all.wav > ./noise/babble/muavic/valid.tsv
@@ -86,7 +93,20 @@ echo $(pwd)/noise/babble/lrs3/noise.wav > ./noise/babble/lrs3/valid.tsv
 
 LRS2: The data can be downloaded [here](https://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrs2.html) after signing a license and sending it to the BBC (helper script: `notebooks/lrs2_download.ipynb`). In our experience, it took a week to receive the username & password for the data download. We used the [AutoAVSR scripts](https://github.com/mpc001/auto_avsr/tree/main/preparation) to process LRS2 (using the provided facial landmarks). Finally, the AutoAVSR data lists must be converted to AV-HuBERT / Fairseq manifests. We provide a script to do this (`notebooks/lrs2_make_tsv.ipynb`).
 
-# Pre-trained Models
+# mWhisper-Flamingo / multilingual Pre-Trained Models
+### Audio-only Whisper (fine-tuned on MuAViC with noise)
+| Mod. | Size | Parameters | Langs. | Train GPUs | Download Link |
+|---|---|---|---|---|---|
+| A | Medium | 769M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper_multi-all_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_multi-all_medium.pt)  |
+| A | Small | 244M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper_multi-all_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_multi-all_small.pt)   |
+
+### Audio-visual mWhisper-Flamingo
+| Mod. | Size | Parameters | Langs. | Train GPUs | Download Link |
+|---|---|---|---|---|---|
+| A | Medium | 1,390M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper-flamingo_multi-all_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_multi-all_medium.pt)  |
+| A | Small | 651M  | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper-flamingo_multi-all_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_multi-all_small.pt)   |
+
+# English Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
 - Our audio models are fine-tuned with noise from MUSAN and LRS3 (including babble noise, speech, and music), making them perform better in noise (see the paper and our video demo for more details)
 - We also release the models trained on the combination of LRS3 and VoxCeleb2 (the transcripts of VoxCeleb2 were obtained by Whisper Large-V2, available from this [repo](https://github.com/nikvaessen/disjoint-mtl?tab=readme-ov-file)). We release the models fine-tuned with noise (noisy) and without noise (clean). **whisper_en_large_vc2_clean achieves SOTA ASR on LRS3 (0.68% WER) and whisper-flamingo_en_large_vc2_clean achieves SOTA AVSR on LRS3 (0.72% WER).**
@@ -117,30 +137,25 @@ Note that to enable the new En-X translation capabilities, we use the 'transcrib
 |   AV  |   Small  | no |    651M  |   yes  |   yes  |   4x A5000, 24GB  |   [whisper-flamingo_en-x_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_en-x_small.pt)  |
 
 # Decoding Script
-
-The script `whisper_decode_video.py` is used for decoding both audio-only Whisper models and audio-visual Whisper-Flamingo models. We also provide a SLURM scripts to run decoding in parallel, see the next section for details.
 ### Audio-Only Decoding
-Download our audio-only Whisper model fine-tuned for En-X translation.
+First, download our models. Ex: audio-only Whisper model fine-tuned for En-X translation.
 ```
 mkdir models
 wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_en-x_small.pt -P models
 ```
 
 Decode an audio-only model (see `whisper_decode_video.py` for argument details):
-- To switch to En-X translation, change the `lang` to the target language.
+- For this model, to switch to En-X translation, change the `lang` to the target language and use `--task En-X`.
 - Here we use babble noise from MuAViC at 0 SNR. Use `noise/babble/lrs3/test.tsv` for babble noise from LRS3. Use `--noise-snr 1000` to evaluate in clean conditions.
 - Here use beam size 1. In the paper we report results with beam size 15.
-- For GPU without fp16, and for cpu, use `--fp16 0`
+- For GPU without fp16, and for cpu, use `--fp16 0`.
 ```
 python -u whisper_decode_video.py --lang en \
                                 --model-type small \
                                 --noise-snr 0 \
                                 --noise-fn noise/babble/muavic/test.tsv \
-                                --beam-size 1 \
                                 --modalities asr \
-                                --fp16 1 \
-                                --checkpoint-path models/whisper_en-x_small.pt \
-                                --decode-path decode/
+                                --checkpoint-path models/whisper_en-x_small.pt
 ```
 
 LRS2 ASR decoding (adjust `noise_snr` as desired):
@@ -149,15 +164,22 @@ python -u whisper_decode_video.py --lang lrs2 \
                                 --model-type medium \
                                 --noise-snr 1000 \
                                 --noise-fn noise/babble/lrs3/test.tsv \
-                                --beam-size 1 \
                                 --modalities asr \
-                                --fp16 1 \
-                                --checkpoint-path models/whisper_lrs2_medium.pt \
-                                --decode-path decode/
+                                --checkpoint-path models/whisper_lrs2_medium.pt
+```
+
+MuAViC Es decoding using our fine-tuned Whisper (you can change Es to any other supported language):
+```
+python -u whisper_decode_video.py --lang es \
+                                --model-type small \
+                                --noise-snr 0 \
+                                --noise-fn noise/babble/lrs3/test.tsv \
+                                --modalities asr \
+                                --checkpoint-path models/whisper_multi-all_small.pt
 ```
 
 ### Audio-Visual Decoding
-Download our audio-visual Whisper-Flamingo model fine-tuned for En-X translation.
+First, download our models. Ex: our audio-visual Whisper-Flamingo model fine-tuned for En-X translation.
 Note: the AV-HuBERT weights must be downloaded and are used by Fairseq to load the architecture.
 ```
 mkdir models
@@ -171,13 +193,10 @@ python -u whisper_decode_video.py --lang en \
                                 --model-type small \
                                 --noise-snr 0 \
                                 --noise-fn noise/babble/muavic/test.tsv \
-                                --beam-size 1 \
                                 --modalities avsr \
                                 --use_av_hubert_encoder 1 \
                                 --av_fusion separate \
-                                --fp16 1 \
                                 --checkpoint-path models/whisper-flamingo_en-x_small.pt \
-                                --decode-path decode/ \
                                 --av-hubert-path av_hubert/avhubert/ \
                                 --av-hubert-ckpt models/large_noise_pt_noise_ft_433h_only_weights.pt
 ```
@@ -188,41 +207,54 @@ python -u whisper_decode_video.py --lang lrs2 \
                                 --model-type medium \
                                 --noise-snr 1000 \
                                 --noise-fn noise/babble/lrs3/test.tsv \
-                                --beam-size 1 \
                                 --modalities avsr \
                                 --use_av_hubert_encoder 1 \
                                 --av_fusion separate \
-                                --fp16 1 \
                                 --checkpoint-path models/whisper-flamingo_lrs2_medium.pt \
-                                --decode-path decode/ \
                                 --av-hubert-path av_hubert/avhubert/ \
                                 --av-hubert-ckpt models/large_noise_pt_noise_ft_433h_only_weights.pt
 ```
 
-# Decoding Script in Parallel with SLURM
-We provide `slurm/whisper_decode_video_slurm_wrapper.sh` which submits decoding jobs tp SLURM for a given checkpoint to test all En-X languages in both clean / noisy conditions. Please modify `slurm/whisper_decode_video_slurm.sh` to match your SLURM environment.
+MuAViC Es decoding using mWhisper-Flamingo (you can change Es to any other supported language):
+```
+# NOTE: run this first to download the multilingual AV-HuBERT weights
+wget https://data.csail.mit.edu/public-release-sls/mwhisper-flamingo/models/mavhubert_only_weights.pt -P models
+```
+```
+python -u whisper_decode_video.py --lang es \
+                                --model-type small \
+                                --noise-snr 0 \
+                                --noise-fn noise/babble/lrs3/test.tsv \
+                                --modalities avsr \
+                                --use_av_hubert_encoder 1 \
+                                --av_fusion separate \
+                                --checkpoint-path models/whisper-flamingo_multi-all_small.pt \
+                                --av-hubert-path av_hubert/avhubert/ \
+                                --av-hubert-ckpt models/mavhubert_only_weights.pt
+```
+                          
 
-After submitting all jobs with `source slurm/whisper_decode_video_slurm_wrapper.sh`, use `slurm/check_results.ipynb` to print the results of all decoding runs. It will load the decoding WER / BLEU scores and print them in a convinient table.
+# Decoding Script in Parallel with SLURM
+We provide `slurm/whisper_decode_wrapper.sh` (En-X) and `slurm/whisper_decode_multi_wrapper.sh` (multilingual ASR) for submitting decoding jobs to SLURM. After submitting all jobs, ie. `source slurm/whisper_decode_wrapper.sh`, use `slurm/check_results.ipynb` or `slurm/multilingual_check_results.ipynb` to print the results of all decoding runs. It will load the decoding WER / BLEU scores and print them in a convinient table.
 
 # Training
 
-### Step 1: Fine-tune audio-only Whisper for En-X translation on MuAViC
-First, in `config/audio/audio_en-x_large.yaml`, replace `noise_fn: '/data/sls/scratch/roudi/datasets/musan/tsv/all/train.tsv'` with the path to your training noise.
-Command:
+### Step 1: Fine-tune audio-only Whisper on MuAViC with noise
+First, pick a config from `config/audio/`, for example `config/audio/audio_en-x_large.yaml`. Then replace `noise_fn: '/data/sls/scratch/roudi/datasets/musan/tsv/all/train.tsv'` with the path to your training noise. Training Command:
 ```
 python -u whisper_ft_muavic.py config/audio/audio_en-x_large.yaml
 ```
-We also provide a slurm script in `slurm/train_audio_4gpu.sh`. 
+We also provide a slurm script in `slurm/train_audio_4gpu.sh` (En-X, multilingual models) and `slurm/train_audio_1gpu.sh` (En models). 
 It took about 2-3 days to fine-tune Whisper Large-V2 on our GPUs. 
-The medium and small models are faster take less time to train.
+The medium and small models finish in about a day.
 
 ### Step 2: Train audio-visual Whisper-Flamingo with gated cross attention
-Once the audio model is fine-tuned, we freeze the weights and insert the gated cross-attention layers to train the audio-visual Whisper-Flamingo. Command:
+Once the audio model is fine-tuned, we freeze the weights and insert the gated cross-attention layers to train the audio-visual Whisper-Flamingo. Use the corresponding config in `config/audio-visual/`. Training Command:
 ```
 python -u whisper_ft_muavic_video.py config/audio-visual/av_en-x_large.yaml
 ```
-We also provide a slurm script in `slurm/train_video_4gpu.sh`.
-Training Whisper-Flamingo is faster since the cross-attention layers are the only trainable layers. It took about 1 day to train Whisper-Flamingo Large on our GPUs (not including the time to fine-tune the audio model in the first step.).
+We also provide a slurm script in `slurm/train_video_4gpu.sh` (En-X, multilingual models) and `slurm/train_video_1gpu.sh` (En models). 
+Training Whisper-Flamingo is faster since the cross-attention layers are the only trainable layers. It took about 1 day to train Whisper-Flamingo Large on our GPUs (not including the time to fine-tune the audio model in the first step).
 
 ### Training progress
 Model weights will be saved in `models/checkpoint`.
@@ -237,13 +269,15 @@ tensorboard --logdir .  --port 6008
 
 
 # Acknowledgments
-This code based is based on the following repos: [Whisper Fine-Tuning Demo](https://colab.research.google.com/drive/1P4ClLkPmfsaKn2tBbRp0nVjGMRKR-EWz?usp=sharing), [Whisper](https://github.com/openai/whisper), [AV-HuBERT](https://github.com/facebookresearch/av_hubert), [MuAViC](https://github.com/facebookresearch/muavic), [ESPnet](https://github.com/espnet/espnet), [AutoAVSR](https://github.com/mpc001/auto_avsr), [Flamingo-pytorch](https://github.com/lucidrains/flamingo-pytorch).
+This code based is based on the following repos: [Whisper Fine-Tuning Demo](https://colab.research.google.com/drive/1P4ClLkPmfsaKn2tBbRp0nVjGMRKR-EWz?usp=sharing), [Whisper](https://github.com/openai/whisper), [AV-HuBERT](https://github.com/facebookresearch/av_hubert), [MuAViC](https://github.com/facebookresearch/muavic), [ESPnet](https://github.com/espnet/espnet), [AutoAVSR](https://github.com/mpc001/auto_avsr), [Flamingo-pytorch](https://github.com/lucidrains/flamingo-pytorch), [e-mvsr](https://github.com/JeongHun0716/e-mvsr).
 
 
 # License
 Our work is licensed under BSD-3. However, please check the licenses of the works we build on, including AV-HuBERT.
 
 # Citation
+mWhisper-Flamingo - coming soon!
+
 ```bibtex
 @inproceedings{rouditchenko24_interspeech,
   title     = {Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation},

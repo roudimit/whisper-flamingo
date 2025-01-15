@@ -184,6 +184,7 @@ class AudioEncoder(nn.Module):
         self.video = video
         self.av_hubert_encoder = av_hubert_encoder
         self.av_fusion = av_fusion
+        self.video_model_path = video_model_path
         if video:
             self.video_projection_scalar = nn.Parameter(torch.tensor(1.))
             self.prob_av, self.prob_a = prob_av, prob_a
@@ -202,6 +203,12 @@ class AudioEncoder(nn.Module):
                 self.video_model = models[0].encoder if 'ft' in video_model_path else models[0]
                 num_parameters = sum(p.numel() for p in self.video_model.parameters())
                 print("Using AV-HuBERT encoder with parameters: {}".format(num_parameters)) 
+            if self.av_fusion == "lip-reader":
+                self.video_projection_blocks: Iterable[ResidualAttentionBlock] = nn.ModuleList(
+                            [ResidualAttentionBlock(n_state, n_head) for _ in range(3)]
+                    )
+                num_parameters = sum(p.numel() for p in self.video_projection_blocks.parameters())
+                print("Adding visual transformer layers with number of params: {}".format(num_parameters)) 
 
     def forward(self, x: Tensor, x_v=None, training=False, test_a=False, test_v=False, track_norm=False, 
                 padding_mask=None):
@@ -209,16 +216,23 @@ class AudioEncoder(nn.Module):
         x : torch.Tensor, shape = (batch_size, n_mels, n_ctx)
             the mel spectrogram of the audio
         """
-        x = F.gelu(self.conv1(x))
-        x = F.gelu(self.conv2(x))
-        x = x.permute(0, 2, 1)
-        if track_norm:
-            x_norm = torch.linalg.norm(x, dim=-1).mean()
+        if not test_v:
+            x = F.gelu(self.conv1(x))
+            x = F.gelu(self.conv2(x))
+            x = x.permute(0, 2, 1)
+            if track_norm:
+                x_norm = torch.linalg.norm(x, dim=-1).mean()
 
         if self.video and not test_a:
             if not self.av_hubert_encoder:
                 x_v = self.video_model(x_v) # B, F, T
                 x_v = x_v.permute(0, 2, 1) # B, T, F
+            elif not 'ft' in self.video_model_path: # AV-HuBERT ssl
+                x_v = self.video_model(source={'video': x_v, 'audio': None}, 
+                                        padding_mask=padding_mask, 
+                                        mask=False, 
+                                        features_only=True)
+                x_v = x_v['x']
             else:
                 x_v = self.video_model(source={'video': x_v, 'audio': None}, padding_mask=padding_mask)
                 x_v = x_v['encoder_out'].permute(1, 0 , 2) # T, B, F -> B, T, F
@@ -226,43 +240,47 @@ class AudioEncoder(nn.Module):
             if track_norm:
                 x_v_norm_pre = torch.linalg.norm(x_v, dim=-1).mean()
 
+            if self.av_fusion == "lip-reader":
+                x_v = torch.repeat_interleave(x_v, 2, dim=1) # 25 Hz -> 50 Hz 
             x_v = self.video_projection(x_v)
             x_v = self.video_projection_scalar * x_v
+
+            if self.av_fusion == "lip-reader":
+                # NOTE: pos embedding added before
+                if x_v.shape[1] > 1500:
+                    x_v = x_v[ :, :1500, :]
+                # NOTE: if max_len is 30s, then the cropping doesn't do anything.
+                x_v = (x_v + self.positional_embedding[: x_v.shape[1]]).to(x_v.dtype) # trim pos embedding
+
+                for layer, block in enumerate(self.video_projection_blocks): # NOTE: new transformer layers
+                    x_v = block(x_v)
+
+                x = x_v # NOTE: use AV-HuBERT output as input
 
             if track_norm:
                 x_v_norm_post = torch.linalg.norm(x_v, dim=-1).mean()
 
-            if not self.av_fusion == 'separate':
-                x_v = torch.repeat_interleave(x_v, 2, dim=1) # 25 Hz -> 50 Hz
+        if not test_v:
+            # NOTE: pos embedding has max length of 1500 (30s after conv downsample from 3000 mel frames)
+            if x.shape[1] > 1500:
+                x = x[ :, :1500, :]
 
-            if self.av_fusion == "early":
-                mod_drop_prob = np.random.random()
-                if training:
-                    if 0 < mod_drop_prob <= self.prob_av:
-                        pass # use both modalities
-                    if self.prob_av < mod_drop_prob <= self.prob_av + self.prob_a:
-                        x_v = 0 * x_v # use audio
-                    else:
-                        x = 0 * x # use video
-                elif test_a:
-                    x_v = 0 * x_v # use audio
-                elif test_v:
-                    x = 0 * x # use video
-                crop_len = min(x.shape[1], x_v.shape[1])
-                x = x[:, :crop_len, :] + x_v[:, :crop_len, :]
-
-        # NOTE: pos embedding has max length of 1500 (30s after conv downsample from 3000 mel frames)
-        if x.shape[1] > 1500:
-            x = x[ :, :1500, :]
-
-        # NOTE: if max_len is 30s, then the cropping doesn't do anything.
-        x = (x + self.positional_embedding[: x.shape[1]]).to(x.dtype) # trim pos embedding
+            # NOTE: if max_len is 30s, then the cropping doesn't do anything.
+            x = (x + self.positional_embedding[: x.shape[1]]).to(x.dtype) # trim pos embedding
 
         for layer, block in enumerate(self.blocks):
             x = block(x)
 
         x = self.ln_post(x)
 
+        if training: # modality dropout, encoder
+            mod_drop_prob = np.random.random()
+            if 0 < mod_drop_prob <= self.prob_av:
+                pass # use both modalities
+            elif self.prob_av < mod_drop_prob <= self.prob_av + self.prob_a:
+                x_v = 0 * x_v # drop video
+            else:
+                x = 0 * x # drop audio
         if track_norm:
             return x, x_norm, x_v_norm_pre, x_v_norm_post, x_v
         return x, x_v

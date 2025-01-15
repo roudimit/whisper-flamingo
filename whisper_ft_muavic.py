@@ -98,7 +98,9 @@ class WhisperModelModule(LightningModule):
                                         device='cpu', # avoid OOM on gpu 0 for distributed
                                         download_root='/data/sls/scratch/roudi/experiments/whisper/',
                                         dropout_rate=cfg.dropout_rate)
-        self.tokenizer = whisper.tokenizer.get_tokenizer(multilingual=True, task='transcribe')
+        multilingual = True if 'large' in model_name or 'en' not in model_name else False
+        print("Multilingual tokenizer : {}".format(multilingual))
+        self.tokenizer = whisper.tokenizer.get_tokenizer(multilingual=multilingual, task='transcribe')
 
         # if 'large' in self.model_name: # only decoder training
         #     for p in self.model.encoder.parameters():
@@ -319,24 +321,24 @@ tflogger, checkpoint_callback, callback_list = setup_logging_and_checkpoint(cfg.
                                                                             cfg.train_name, 
                                                                             cfg.train_id,
                                                                             cfg.monitor,)
-
-if cfg.lang == 'multi':
+if cfg.lang == 'multi-all':
     audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
                                            ['en', 'ar', 'de', 'el', 'es', 'fr', 'it', 'pt', 'ru'],
-                                           reduce_val=150, include_audio_lens=True)
+                                            reduce_val=300, include_audio_lens=True)
+elif cfg.lang == 'multi':
+    audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
+                                            ['en', 'es', 'fr', 'it', 'pt'],
+                                            reduce_val=300, include_audio_lens=True, vc2=cfg.vc2, vc2_path=cfg.vc2_path)
 elif cfg.lang == 'multi_en-st':
     audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, 
                                            ['en', 'el', 'es', 'fr', 'it', 'pt', 'ru'],
-                                        #    ['el', 'es', 'fr', 'it', 'pt', 'ru'], # TODO: update reduce_val to None
-                                           reduce_val=200, include_audio_lens=True, translate=True)
-elif '-st' in cfg.lang:
-    audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, [cfg.lang.replace('-st', '')], 
-                                           include_audio_lens=True, translate=True)
+                                           reduce_val=200, include_audio_lens=True, task='En-X')
 elif 'lrs2' in cfg.lang:
     audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, ['en'], 
                                         include_audio_lens=True, lrs2=True)
 else:
-    audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, [cfg.lang], include_audio_lens=True)
+    audio_transcript_pair_list = load_data(cfg.audio_max_length, cfg.text_max_length, [cfg.lang], 
+                                           include_audio_lens=True, vc2=cfg.vc2, vc2_path=cfg.vc2_path)
 model = WhisperModelModule(cfg, cfg.model_name, cfg.lang, audio_transcript_pair_list['train'], 
                                                           audio_transcript_pair_list['valid'],
                                                           audio_transcript_pair_list['test'])

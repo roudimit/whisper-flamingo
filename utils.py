@@ -212,7 +212,7 @@ def add_noise(clean_wav, noise_wavs, noise_snr=0):
 
 def load_data(AUDIO_MAX_LENGTH, TEXT_MAX_LENGTH, langs=['en', 'ar', 'de', 'el', 'es', 'fr', 'it', 'pt', 'ru'],
               muavic_root='/data/sls/scratch/roudi/datasets/muavic/', reduce_val=None, include_audio_lens=False,
-              AUDIO_MAX_LENGTH_VAL=480000, translate=False, lrs2=False):
+              AUDIO_MAX_LENGTH_VAL=480000, vc2=False, vc2_path='', lrs2=False, visible=False, task='transcribe'):
     # reduce_val: If not None, keep this number of samples from the validation set
     audio_transcript_pair_list = {'train':[], 'valid':[], 'test':[]}
     for lang in langs:
@@ -220,12 +220,28 @@ def load_data(AUDIO_MAX_LENGTH, TEXT_MAX_LENGTH, langs=['en', 'ar', 'de', 'el', 
             if lrs2:
                 txt_fn = os.path.join('/data/sls/scratch/roudi/datasets/lrs2/whisper-flamingo/{}.wrd'.format(split))
                 tsv_fn = os.path.join('/data/sls/scratch/roudi/datasets/lrs2/whisper-flamingo/{}.tsv'.format(split))
-            elif not translate or lang == 'en':
-                tsv_fn = os.path.join(muavic_root, 'muavic', lang, '{}.tsv'.format(split))
-                txt_fn = os.path.join(muavic_root, 'muavic', lang, '{}.{}'.format(split, lang))
-            else: # translate, only support en -> X for now
-                tsv_fn = os.path.join(muavic_root, 'muavic', 'en', lang, '{}.tsv'.format(split))
-                txt_fn = os.path.join(muavic_root, 'muavic', 'en', lang, '{}.{}'.format(split, lang))
+            elif lang == 'en':
+                if split == 'train' and vc2:
+                    txt_fn = os.path.join(muavic_root, 'muavic', vc2_path, '{}.{}'.format(split, lang))
+                    tsv_fn = os.path.join(muavic_root, 'muavic', vc2_path, '{}.tsv'.format(split))
+                else:
+                    tsv_fn = os.path.join(muavic_root, 'muavic', 'en', '{}.tsv'.format(split))
+                    txt_fn = os.path.join(muavic_root, 'muavic', 'en', '{}.en'.format(split))
+            else: # multilingual
+                if task == 'transcribe':
+                    if split == 'train' and vc2:
+                        tsv_fn = os.path.join(muavic_root, 'muavic', lang, 'muavic_normalized', 'train_muavic_vc2.tsv')
+                        txt_fn = os.path.join(muavic_root, 'muavic', lang, 'muavic_normalized', 'train_muavic_vc2.{}'.format(lang))
+                    else:
+                        tsv_fn = os.path.join(muavic_root, 'muavic', lang, 'muavic_normalized', '{}.tsv'.format(split))
+                        txt_fn = os.path.join(muavic_root, 'muavic', lang, 'muavic_normalized', '{}.{}'.format(split, lang))
+                elif task == 'En-X': # EN-X translation                    
+                    tsv_fn = os.path.join(muavic_root, 'muavic', 'en', lang, '{}.tsv'.format(split))
+                    txt_fn = os.path.join(muavic_root, 'muavic', 'en', lang, '{}.{}'.format(split, lang))
+                elif task == 'X-En': # X-En translation
+                    tsv_fn = os.path.join(muavic_root, 'muavic', lang, 'en', '{}.tsv'.format(split))
+                    txt_fn = os.path.join(muavic_root, 'muavic', lang, 'en', '{}.en'.format(split))
+                
             with open(tsv_fn) as tsv:
                 with open(txt_fn) as txt:
                     audio_lns = tsv.readlines()[1:]
@@ -237,6 +253,10 @@ def load_data(AUDIO_MAX_LENGTH, TEXT_MAX_LENGTH, langs=['en', 'ar', 'de', 'el', 
                     wav_fns =  list(filter(lambda x: x[4] > 0, wav_fns))
                     post_video_check = len(wav_fns)
                     print("Removed {} samples with missing video (before filtering lengths)".format(pre_video_check - post_video_check))
+                    pre_video_check = len(wav_fns)
+                    wav_fns =  list(filter(lambda x: x[3] > 0, wav_fns))
+                    post_video_check = len(wav_fns)
+                    print("Removed {} samples with missing text".format(pre_video_check - post_video_check))
                     len_before = len(wav_fns)
                     if split == 'train': 
                         wav_fns =  list(filter(lambda x: x[1] <= AUDIO_MAX_LENGTH, wav_fns))
@@ -248,7 +268,7 @@ def load_data(AUDIO_MAX_LENGTH, TEXT_MAX_LENGTH, langs=['en', 'ar', 'de', 'el', 
                         lang_filtered = [(lang, i[0], i[2]) for i in wav_fns]
                     else: 
                         lang_filtered = [(lang, i[0], i[2], i[1]) for i in wav_fns]
-                    if split == 'valid' and reduce_val is not None:
+                    if split == 'valid' or split == 'test' and reduce_val is not None:
                         lang_filtered = lang_filtered[:reduce_val]
                     len_after = len(lang_filtered)
                     audio_transcript_pair_list[split] += lang_filtered
@@ -415,9 +435,8 @@ def whisper_video_projection_optimizer(model, cfg, t_total):
     return optimizer, scheduler
 
 def whisper_flamingo_projection_optimizer(model, cfg, t_total):
-    x_attn = ["gated_x_attn", "attn_gate", "ff"]
     video_projection = ["video_projection"]
-    # x_attn = ["gated_x_attn", "attn_gate", "ff"] if cfg.freeze_video_model else ["video_model", "video_blocks" "gated_x_attn", "attn_gate", "ff"]
+    x_attn = ["gated_x_attn", "attn_gate", "ff"] if cfg.freeze_video_model else ["video_model", "gated_x_attn", "attn_gate", "ff"]
     optimizer_grouped_parameters = [
         {
             "params": [p for n, p in model.named_parameters()
@@ -425,6 +444,9 @@ def whisper_flamingo_projection_optimizer(model, cfg, t_total):
             "lr": cfg.learning_rate,
         },
     ]
+    print("optimizing params: ")
+    print([n for n, p in model.named_parameters()
+                        if any(nd in n for nd in x_attn + video_projection)])
     optimizer = AdamW(optimizer_grouped_parameters,
                         lr=cfg.learning_rate,
                         eps=cfg.adam_epsilon,
