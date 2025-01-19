@@ -97,14 +97,14 @@ LRS2: The data can be downloaded [here](https://www.robots.ox.ac.uk/~vgg/data/li
 ### Audio-only Whisper (fine-tuned on MuAViC with noise)
 | Mod. | Size | Parameters | Langs. | Train GPUs | Download Link |
 |---|---|---|---|---|---|
-| A | Medium | 769M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper_multi-all_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_multi-all_medium.pt)  |
-| A | Small | 244M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper_multi-all_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper_multi-all_small.pt)   |
+| A | Medium | 769M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper_multi-all_medium](https://data.csail.mit.edu/public-release-sls/mwhisper-flamingo/models/whisper_multi-all_medium.pt)  |
+| A | Small | 244M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper_multi-all_small](https://data.csail.mit.edu/public-release-sls/mwhisper-flamingo/models/whisper_multi-all_small.pt)   |
 
 ### Audio-visual mWhisper-Flamingo
 | Mod. | Size | Parameters | Langs. | Train GPUs | Download Link |
 |---|---|---|---|---|---|
-| A | Medium | 1,390M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper-flamingo_multi-all_medium](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_multi-all_medium.pt)  |
-| A | Small | 651M  | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper-flamingo_multi-all_small](https://data.csail.mit.edu/public-release-sls/whisper-flamingo/models/whisper-flamingo_multi-all_small.pt)   |
+| A | Medium | 1,390M | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper-flamingo_multi-all_medium](https://data.csail.mit.edu/public-release-sls/mwhisper-flamingo/models/whisper-flamingo_multi-all_medium.pt)  |
+| A | Small | 651M  | En, Ar, De, El, Es, It, Fr, Pt, Ru | 4x A6000, 48GB | [whisper-flamingo_multi-all_small](https://data.csail.mit.edu/public-release-sls/mwhisper-flamingo/models/whisper-flamingo_multi-all_small.pt)   |
 
 # English Pre-trained Models
 We release our pre-trained models (GPUs = GPUs used for training).
