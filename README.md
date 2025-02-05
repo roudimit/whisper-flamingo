@@ -1,4 +1,4 @@
-# Whisper-Flamingo
+# Whisper-Flamingo and mWhisper-Flamingo
 
 ## Updates
 **Jan 2025:** We released mWhisper-Flamingo, a SOTA AVSR model for 9 languages! [Paper link](https://arxiv.org/abs/2502.01547).  
@@ -7,7 +7,7 @@
 
 ## Introduction
 
-Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation
+[Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation](https://arxiv.org/abs/2406.10082)
 
 We propose Whisper-Flamingo which integrates visual features into the Whisper speech recognition and translation model with gated cross attention. 
 Our audio-visual Whisper-Flamingo outperforms audio-only Whisper on English speech recognition and En-X translation for 6 languages in noisy conditions.
@@ -15,7 +15,7 @@ Moreover, Whisper-Flamingo is a versatile model and conducts all of these tasks 
 
 ![Whisper-Flamingo](assets/whisper_flamingo_fig.jpg "Whisper-Flamingo")
 
-mWhisper-Flamingo for Multilingual Audio-Visual Noise-Robust Speech Recognition
+[mWhisper-Flamingo for Multilingual Audio-Visual Noise-Robust Speech Recognition](https://arxiv.org/abs/2502.01547)
 
 We propose mWhisper-Flamingo for multilingual AVSR. To enable better multi-modal integration and improve the noisy multilingual performance, we introduce decoder modality dropout where the model is trained both on paired audio-visual inputs and separate audio/visual inputs. mWhisper-Flamingo achieves state-of-the-art WER on MuAViC, an AVSR dataset of 9 languages.
 
