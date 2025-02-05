@@ -1,19 +1,25 @@
 # Whisper-Flamingo
 
 ## Updates
-**Jan 2025:** We released mWhisper-Flamingo, a SOTA audio-visual model for 9 languages (paper coming soon)!   
+**Jan 2025:** We released mWhisper-Flamingo, a SOTA AVSR model for 9 languages! [Paper link](https://arxiv.org/abs/2502.01547).  
 **Nov 2024:** We achieved SOTA ASR (1.3\%) and SOTA AVSR (1.4\%) on LRS2 - checkpoints are released below.  
 **Oct 2024:** We achieved SOTA ASR (0.68% WER) and SOTA AVSR (0.72% WER) on LRS3 by training on LRS3 and VoxCeleb2 - checkpoints are released below.
 
 ## Introduction
 
-Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation
+Whisper-Flamingo: Integrating Visual Features into Whisper for Audio-Visual Speech Recognition and Translation
 
 We propose Whisper-Flamingo which integrates visual features into the Whisper speech recognition and translation model with gated cross attention. 
 Our audio-visual Whisper-Flamingo outperforms audio-only Whisper on English speech recognition and En-X translation for 6 languages in noisy conditions.
 Moreover, Whisper-Flamingo is a versatile model and conducts all of these tasks using one set of parameters, while prior methods are trained separately on each language.
 
 ![Whisper-Flamingo](assets/whisper_flamingo_fig.jpg "Whisper-Flamingo")
+
+mWhisper-Flamingo for Multilingual Audio-Visual Noise-Robust Speech Recognition
+
+We propose mWhisper-Flamingo for multilingual AVSR. To enable better multi-modal integration and improve the noisy multilingual performance, we introduce decoder modality dropout where the model is trained both on paired audio-visual inputs and separate audio/visual inputs. mWhisper-Flamingo achieves state-of-the-art WER on MuAViC, an AVSR dataset of 9 languages.
+
+![Whisper-Flamingo](assets/mWhisper-Flamingo_fig.png "Whisper-Flamingo")
 
 # Video Demos
 Check out the video demo below (turn sound on).
@@ -30,10 +36,24 @@ We made several videos about Whisper-Flamingo:
 </tr>
 </table>
 
+1m demo of mWhisper-Flamingo (turn sound on). [YouTube link](https://youtu.be/Z6VYvlaErTo).
+<table class="center">
+<tr>
+    <td width=100% style="border: none">
+        <video controls autoplay loop src="https://github.com/user-attachments/assets/4852942f-e54d-4bf3-9f28-e038b4edb100" muted="false"></video>
+    </td>
+</tr>
+</table>
+
+
+
 # Colab Demos
-We support two colab demos (local copies in `./notebooks`):
-- Test Whisper-Flamingo on an example audio / video [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1rnhNOZuUxh-WXXloo_z1fu5DKeJrH95p)
-- Reproduce our results on LRS3 / MuAViC: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1tYI_7GxJuQdhWnO4m6TUplEoxVaYgbvW)
+Whisper-Flamingo Colab notebooks. **Note:** Google Colab updated Python to 3.11, which makes the Fairseq version incompatible and the notebooks might not work anymore. We recommend installing our conda environment locally and running the local versions.
+- Test Whisper-Flamingo on an example audio / video [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1rnhNOZuUxh-WXXloo_z1fu5DKeJrH95p). Local copy: `notebooks/whisper_flamingo_demo_noise.ipynb`.
+- Reproduce our results on LRS3 / MuAViC: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1tYI_7GxJuQdhWnO4m6TUplEoxVaYgbvW). Local copy: `notebooks/whisper_flamingo_demo.ipynb`.
+
+mWhisper-Flamingo notebooks:
+- Test mWhisper-Flamingo on an example audio / video (reproduce the demo video): `notebooks/mwhisper_flamingo_demo_noise.ipynb`.
 
 # Virtual Environment for Training and Testing
 Since this project uses the MuAViC dataset, we base our virtual environment on theirs.
