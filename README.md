@@ -54,6 +54,7 @@ Whisper-Flamingo Colab notebooks. **Note:** Google Colab updated Python to 3.11,
 
 mWhisper-Flamingo notebooks:
 - Test mWhisper-Flamingo on an example audio / video (reproduce the demo video): `notebooks/mwhisper_flamingo_demo_noise.ipynb`.
+- Reproduce our results on MuAViC Es ASR: `notebooks/mwhisper_flamingo_demo.ipynb`
 
 # Virtual Environment for Training and Testing
 Since this project uses the MuAViC dataset, we base our virtual environment on theirs.
@@ -92,6 +93,9 @@ Install extra packages used in our project:
 ```
 pip install tiktoken==0.5.2 pytorch-lightning==2.1.3 numba==0.58.1 transformers==4.36.2 evaluate tensorboardX
 ```
+
+**Important:** to use mWhisper-Flamingo, a minor change is required in the AV-HuBERT code.
+Specfically, comment out [line 624](https://github.com/facebookresearch/av_hubert/blob/e8a6d4202c208f1ec10f5d41a66a61f96d1c442f/avhubert/hubert.py#L624) and add this after line 625: `features_audio = torch.zeros_like(features_video)`. This is needed since we only use video inputs with AV-HuBERT, not audio. Otherwise you will get an error about 'NoneType' object. 
 
 # Download and prepare data
 LRS3 / MuAViC: We provide all data to reproduce the results on the test set. For instructions on how to prepare the training set (and more details about the test noise), see `preparation/README.md`. For MuAViC non-En, we also provide our text labels which were normalized by removing all punctuation except single apostrophes (the code that we used for text normalization is in `notebooks/mtedx_labels.ipynb`). Note that we normalized all the text (training / validation / test).
