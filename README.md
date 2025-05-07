@@ -36,7 +36,8 @@ We made several videos about Whisper-Flamingo:
 </tr>
 </table>
 
-1m demo of mWhisper-Flamingo (turn sound on). [YouTube link](https://youtu.be/Z6VYvlaErTo).
+- 1m demo of mWhisper-Flamingo (turn sound on). [YouTube link](https://youtu.be/Z6VYvlaErTo).
+- 20m presentation: [YouTube link](https://youtu.be/NjeEZWO7m9I?si=7FWbsaAcCVtn9reg).
 <table class="center">
 <tr>
     <td width=100% style="border: none">
@@ -300,7 +301,14 @@ This code based is based on the following repos: [Whisper Fine-Tuning Demo](http
 Our work is licensed under BSD-3. However, please check the licenses of the works we build on, including AV-HuBERT.
 
 # Citation
-mWhisper-Flamingo - coming soon!
+```bibtex
+@article{rouditchenko2025mwhisper,
+  title={mWhisper-Flamingo for Multilingual Audio-Visual Noise-Robust Speech Recognition},
+  author={Rouditchenko, Andrew and Thomas, Samuel and Kuehne, Hilde and Feris, Rogerio and Glass, James},
+  journal={arXiv preprint arXiv:2502.01547},
+  year={2025}
+}
+```
 
 ```bibtex
 @inproceedings{rouditchenko24_interspeech,
