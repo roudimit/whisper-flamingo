@@ -104,7 +104,7 @@ LRS3 / MuAViC: We provide all data to reproduce the results on the test set. For
 Download and extract our resources:
 ```
 wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/muavic.tar.gz # En
-wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/muavic-multi.tar.gz # Ar, De, El, Es, It, Fr, Pt, Ru
+wget https://data.csail.mit.edu/public-release-sls/mwhisper-flamingo/muavic-multi.tar.gz # Ar, De, El, Es, It, Fr, Pt, Ru
 # NOTE: you can also download muavic-ar.tar.gz, muavic-de.tar.gz, etc... if you need a specific language.
 wget https://data.csail.mit.edu/public-release-sls/whisper-flamingo/noise.tar.gz
 tar -xf muavic.tar.gz
@@ -305,8 +305,9 @@ Our work is licensed under BSD-3. However, please check the licenses of the work
 @article{rouditchenko2025mwhisper,
   title={mWhisper-Flamingo for Multilingual Audio-Visual Noise-Robust Speech Recognition},
   author={Rouditchenko, Andrew and Thomas, Samuel and Kuehne, Hilde and Feris, Rogerio and Glass, James},
-  journal={arXiv preprint arXiv:2502.01547},
-  year={2025}
+  journal={IEEE Signal Processing Letters},
+  year={2025},
+  publisher={IEEE}
 }
 ```
 
